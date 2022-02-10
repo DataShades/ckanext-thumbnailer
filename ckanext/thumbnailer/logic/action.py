@@ -72,4 +72,4 @@ def _get_preview(res: dict[str, Any]):
         try:
             return manager.get_jpeg_preview(path)
         except UnsupportedMimeType as e:
-            log.error("Cannot create preview: %s", e)
+            raise tk.ValidationError({"id": ["Unsupported media type"]})
