@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import tempfile
 import os
+import logging
 from typing import Any, Callable
-from ckan.lib.uploader import get_resource_uploader
+from preview_generator.exception import UnsupportedMimeType
 from preview_generator.manager import PreviewManager
 from werkzeug.datastructures import FileStorage
 
@@ -12,6 +13,7 @@ from ckanext.toolbelt.decorators import Collector
 from ckanext.toolbelt.utils.fs import path_to_resource
 from ckanext.files.model import File
 
+log = logging.getLogger(__name__)
 action, get_actions = Collector("thumbnailer").split()
 
 CONFIG_MAX_REMOTE_SIZE = "ckanext.thumbnailer.max_remote_size"
@@ -67,4 +69,7 @@ def _get_preview(res: dict[str, Any]):
     with path_to_resource(res, max_size) as path:
         if not path:
             raise tk.ValidationError({"id": ["Cannot determine path to resource"]})
-        return manager.get_jpeg_preview(path)
+        try:
+            return manager.get_jpeg_preview(path)
+        except UnsupportedMimeType as e:
+            log.error("Cannot create preview: %s", e)
