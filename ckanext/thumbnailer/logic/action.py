@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import os
 import logging
+import subprocess
 from typing import Any, Callable
 from preview_generator.exception import UnsupportedMimeType
 from preview_generator.manager import PreviewManager
@@ -71,5 +72,6 @@ def _get_preview(res: dict[str, Any]):
             raise tk.ValidationError({"id": ["Cannot determine path to resource"]})
         try:
             return manager.get_jpeg_preview(path)
-        except UnsupportedMimeType as e:
+        except (UnsupportedMimeType, subprocess.CalledProcessError) as e:
+            log.error("Cannot extract thumbnail for resource %s: %s", res["id"], e)
             raise tk.ValidationError({"id": ["Unsupported media type"]})

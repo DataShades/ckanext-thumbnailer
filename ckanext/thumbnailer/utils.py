@@ -18,6 +18,6 @@ def create_thumbnail(context, data_dict):
 
     try:
         result = tk.get_action("thumbnailer_resource_thumbnail_create")(context, data_dict)
-        log.error("Thumbnail for %s created at %s", data_dict["id"], result["thumbnail"])
+        log.info("Thumbnail for %s created at %s", data_dict["id"], result["thumbnail"])
     except tk.ValidationError as e:
         log.error("Cannot create thumbnail: %s", e)
