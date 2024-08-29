@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [v0.1.1](https://github.com/DataShades/ckanext-thumbnailer/releases/tag/v0.1.1) - 2024-08-29
+
+<small>[Compare with v0.1.0](https://github.com/DataShades/ckanext-thumbnailer/compare/v0.1.0...v0.1.1)</small>
+
+### Bug Fixes
+
+- include declarations into package ([9ce91b0](https://github.com/DataShades/ckanext-thumbnailer/commit/9ce91b01eb5d905d0e809def60f34db757a893ea) by Sergey Motornyuk).
+
 ## [v0.1.0](https://github.com/DataShades/ckanext-thumbnailer/releases/tag/v0.1.0) - 2024-08-29
 
 <small>[Compare with v0.0.11](https://github.com/DataShades/ckanext-thumbnailer/compare/v0.0.11...v0.1.0)</small>
