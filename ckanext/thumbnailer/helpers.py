@@ -4,18 +4,20 @@ import ckan.model as model
 import ckan.plugins.toolkit as tk
 
 from ckanext.toolbelt.decorators import Collector
-from ckanext.files.model import File
+from ckanext.files.shared import get_storage, FileData
+from .utils import resource_file
 
 helper, get_helpers = Collector("thumbnailer").split()
 
 
 @helper
 def resource_thumbnail_url(id_: str, qualified: bool = False):
-    existing = (
-        model.Session.query(File)
-        .filter(File.extras["thumbnailer"]["resource_id"].astext == id_)
-        .one_or_none()
-    )
-    if not existing:
+    info = resource_file(id_)
+    if not info:
         return
-    return tk.h.url_for_static(existing.path, qualified=qualified)
+
+    data = FileData.from_dict(info)
+    storage = get_storage("thumbnail")
+    link = storage.public_link(data)
+
+    return tk.h.url_for_static(link, qualified=qualified)

@@ -12,14 +12,11 @@ from werkzeug.datastructures import FileStorage
 import ckan.plugins.toolkit as tk
 from ckanext.toolbelt.decorators import Collector
 from ckanext.toolbelt.utils.fs import path_to_resource
-from ckanext.files.model import File
+from ckanext.files.shared import get_storage, FileData
+from ckanext.thumbnailer import utils, config
 
 log = logging.getLogger(__name__)
 action, get_actions = Collector("thumbnailer").split()
-
-CONFIG_MAX_REMOTE_SIZE = "ckanext.thumbnailer.max_remote_size"
-DEFAULT_MAX_REMOTE_SIZE = 0
-
 
 
 @action
@@ -29,35 +26,41 @@ def resource_thumbnail_create(context, data_dict):
     res = tk.get_action("resource_show")(context, {"id": data_dict["id"]})
 
     preview = _get_preview(res)
-    upload = FileStorage(open(preview, "rb"), "-thumbnail-{}.jpeg".format(res["id"]))
+    upload = open(preview, "rb")
 
-    existing = (
-        context["session"]
-        .query(File)
-        .filter(File.extras["thumbnailer"]["resource_id"].astext == res["id"])
-        .one_or_none()
-    )
+    existing = utils.resource_file(res["id"])
 
-    factory: Callable[..., Any]
     if existing:
-        factory = tk.get_action("files_file_update")
-        data = {
-            "id": existing.id,
-            "upload": upload,
-        }
-    else:
-        factory = tk.get_action("files_file_create")
-        data = {
-            "name": "Resource {id} thumbnail".format(id=res["id"]),
-            "kind": "thumbnail",
-            "upload": upload,
-            "extras": {"thumbnailer": {"resource_id": res["id"]}},
-        }
-    result = factory({"ignore_auth": True, "user": context["user"]}, data)
+        result = tk.get_action("files_file_replace")(
+            {"ignore_auth": True, "user": context["user"]},
+            {
+                "id": existing["id"],
+                "upload": upload,
+            },
+        )
 
-    return {
-        "thumbnail": result["path"]
-    }
+    else:
+        result = tk.get_action("files_file_create")(
+            {"ignore_auth": True, "user": context["user"]},
+            {
+                "name": "-{}.jpeg".format(res["id"]),
+                "storage": "thumbnail",
+                "upload": upload,
+            },
+        )
+
+        tk.get_action("files_transfer_ownership")(
+            {"ignore_auth": True},
+            {
+                "id": result["id"],
+                "owner_id": res["id"],
+                "owner_type": "resource",
+            },
+        )
+
+    storage = get_storage("thumbnail")
+
+    return {"thumbnail": storage.public_link(FileData.from_dict(result))}
 
 
 def _get_preview(res: dict[str, Any]):
@@ -66,12 +69,17 @@ def _get_preview(res: dict[str, Any]):
     )
     manager = PreviewManager(cache, create_folder=True)
 
-    max_size = tk.asint(tk.config.get(CONFIG_MAX_REMOTE_SIZE, DEFAULT_MAX_REMOTE_SIZE))
+    max_size = config.max_remote_size()
+
     with path_to_resource(res, max_size) as path:
         if not path:
             raise tk.ValidationError({"id": ["Cannot determine path to resource"]})
         try:
-            return manager.get_jpeg_preview(path)
+            return manager.get_jpeg_preview(
+                path,
+                width=config.width(),
+                height=config.height(),
+            )
         except (UnsupportedMimeType, subprocess.CalledProcessError) as e:
             log.error("Cannot extract thumbnail for resource %s: %s", res["id"], e)
             raise tk.ValidationError({"id": ["Unsupported media type"]})

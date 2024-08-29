@@ -10,7 +10,7 @@ from .logic import action, auth
 log = logging.getLogger(__name__)
 
 
-
+@tk.blanket.config_declarations
 class ThumbnailerPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurer)
     p.implements(p.IConfigurable)
@@ -54,7 +54,6 @@ class ThumbnailerPlugin(p.SingletonPlugin):
 
     # ITemplateHelpers
     def get_helpers(self):
-
         return helpers.get_helpers()
 
     # IResourceController
