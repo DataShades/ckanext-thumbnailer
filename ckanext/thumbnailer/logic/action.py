@@ -4,7 +4,9 @@ import tempfile
 import os
 import logging
 import subprocess
-from typing import Any, Callable
+import datetime
+from typing import Any
+from ckanext.files.utils import contextlib
 from preview_generator.exception import UnsupportedMimeType
 from preview_generator.manager import PreviewManager
 from werkzeug.datastructures import FileStorage
@@ -27,7 +29,6 @@ def resource_thumbnail_create(context, data_dict):
 
     preview = _get_preview(res)
     upload = open(preview, "rb")
-
     existing = utils.resource_file(res["id"])
 
     if existing:
@@ -70,6 +71,11 @@ def _get_preview(res: dict[str, Any]):
     manager = PreviewManager(cache, create_folder=True)
 
     max_size = config.max_remote_size()
+    force = False
+    with contextlib.suppress(TypeError, KeyError):
+        uploaded_at = datetime.datetime.fromisoformat(res["last_modified"])
+        age = datetime.datetime.now() - uploaded_at
+        force = age < datetime.timedelta(minutes=10)
 
     with path_to_resource(res, max_size) as path:
         if not path:
@@ -79,6 +85,7 @@ def _get_preview(res: dict[str, Any]):
                 path,
                 width=config.width(),
                 height=config.height(),
+                force=force,
             )
         except (UnsupportedMimeType, subprocess.CalledProcessError) as e:
             log.error("Cannot extract thumbnail for resource %s: %s", res["id"], e)
