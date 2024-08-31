@@ -71,9 +71,15 @@ def migrate():
             obj.content_type = "image/jpeg"
             model.Session.commit()
 
-            file = tk.get_action("files_multipart_complete")(
-                {"ignore_auth": True}, {"id": obj.id, "keep_storage_data": True}
-            )
+            try:
+                file = tk.get_action("files_multipart_complete")(
+                    {"ignore_auth": True}, {"id": obj.id, "keep_storage_data": True}
+                )
+            except tk.ValidationError as e:
+                tk.error_shout(
+                    f"File {obj.id} with data {obj.storage_data} is not migrated: {e.error_dict}"
+                )
+                continue
 
             tk.get_action("files_transfer_ownership")(
                 {"ignore_auth": True},
