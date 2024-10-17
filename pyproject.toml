@@ -1,3 +1,45 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ckanext-thumbnailer"
+version = "0.1.4.post1"
+description = ""
+classifiers = [ "Development Status :: 4 - Beta", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14",]
+keywords = [ "CKAN",]
+requires-python = ">= 3.8"
+dependencies = [ "typing_extensions", "preview-generator", "ckanext-toolbelt", "ckanext-files >= 1.0.0a0, < 2.0",]
+authors = [
+    {name = "DataShades", email = "datashades@linkdigital.com.au"},
+    {name = "Sergey Motornyuk", email = "sergey.motornyuk@linkdigital.com.au"},
+]
+maintainers = [
+    {name = "DataShades", email = "datashades@linkdigital.com.au"},
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.license]
+text = "AGPL"
+
+[project.urls]
+Homepage = "https://github.com/DataShades/ckanext-thumbnailer"
+
+[project.optional-dependencies]
+all = [ "preview-generator[all]",]
+
+[project.entry-points."ckan.plugins"]
+thumbnailer = "ckanext.thumbnailer.plugin:ThumbnailerPlugin"
+
+[project.entry-points."babel.extractors"]
+ckan = "ckan.lib.extract:extract_ckan"
+
+[tool.setuptools.packages]
+find = {}
+
 [tool.ruff]
 target-version = "py38"
 
@@ -83,9 +125,7 @@ profile = "black"
 [tool.pytest.ini_options]
 addopts = "--ckan-ini test.ini"
 filterwarnings = [
-               "ignore::sqlalchemy.exc.SADeprecationWarning",
-               "ignore::sqlalchemy.exc.SAWarning",
-               "ignore::DeprecationWarning",
+               # "ignore::DeprecationWarning",
 ]
 
 [tool.git-changelog]
