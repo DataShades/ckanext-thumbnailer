@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-import sqlalchemy as sa
 import click
+import sqlalchemy as sa
+
 import ckan.model as model
 import ckan.plugins.toolkit as tk
 
 from . import utils
+
 
 def get_commands():
     return [thumbnailer]

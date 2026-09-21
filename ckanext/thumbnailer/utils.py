@@ -1,6 +1,6 @@
 from __future__ import annotations
-import logging
 
+import logging
 from typing import Any
 
 import ckan.plugins.toolkit as tk
@@ -43,7 +43,7 @@ def resource_file(id: str) -> dict[str, Any] | None:
             "owner_type": "resource",
             "owner_id": id,
             "storage": "thumbnail",
-            "sort": "ctime",
+            "sort": "created",
             "reverse": True,
             "rows": 1,
         },

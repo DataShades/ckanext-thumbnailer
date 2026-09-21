@@ -1,21 +1,23 @@
 from __future__ import annotations
 
-import tempfile
-import os
-import logging
-import subprocess
+import contextlib
 import datetime
+import logging
+import os
+import subprocess
+import tempfile
 from typing import Any
-from ckanext.files.utils import contextlib
+
 from preview_generator.exception import UnsupportedMimeType
 from preview_generator.manager import PreviewManager
-from werkzeug.datastructures import FileStorage
 
 import ckan.plugins.toolkit as tk
+
+from ckanext.files.shared import FileData, get_storage
 from ckanext.toolbelt.decorators import Collector
 from ckanext.toolbelt.utils.fs import path_to_resource
-from ckanext.files.shared import get_storage, FileData
-from ckanext.thumbnailer import utils, config
+
+from ckanext.thumbnailer import config, utils
 
 log = logging.getLogger(__name__)
 action, get_actions = Collector("thumbnailer").split()
